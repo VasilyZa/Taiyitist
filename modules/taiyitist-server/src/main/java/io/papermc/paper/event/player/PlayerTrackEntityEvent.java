@@ -7,50 +7,39 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Is called when a {@link Player} tracks an {@link Entity}.
- * <p>
- * If cancelled entity is not shown to the player and interaction in both directions is not possible.
- */
 public class PlayerTrackEntityEvent extends PlayerEvent implements Cancellable {
+   private static final HandlerList handlers = new HandlerList();
+   private final Entity entity;
+   private boolean cancelled;
 
-    private static final HandlerList handlers = new HandlerList();
-    private final Entity entity;
-    private boolean cancelled;
+   public PlayerTrackEntityEvent(@NotNull Player player, @NotNull Entity entity) {
+      super(player);
+      this.entity = entity;
+   }
 
-    public PlayerTrackEntityEvent(@NotNull Player player, @NotNull Entity entity) {
-        super(player);
-        this.entity = entity;
-    }
+   @NotNull
+   public static HandlerList getHandlerList() {
+      return handlers;
+   }
 
-    @NotNull
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+   @NotNull
+   @Override
+   public HandlerList getHandlers() {
+      return handlers;
+   }
 
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
+   @NotNull
+   public Entity getEntity() {
+      return this.entity;
+   }
 
-    /**
-     * Gets the entity that will be tracked
-     *
-     * @return the entity tracked
-     */
-    @NotNull
-    public Entity getEntity() {
-        return entity;
-    }
+   @Override
+   public boolean isCancelled() {
+      return this.cancelled;
+   }
 
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
-    }
+   @Override
+   public void setCancelled(boolean cancel) {
+      this.cancelled = cancel;
+   }
 }

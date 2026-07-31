@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +24,7 @@ import org.bukkit.generator.structure.Structure;
 import org.bukkit.generator.structure.StructureType;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.loot.LootTables;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -248,6 +250,56 @@ public interface Registry<T extends Keyed> extends Iterable<T> {
      * @see GameEvent
      */
     Registry<GameEvent> GAME_EVENT = Objects.requireNonNull(Bukkit.getRegistry(GameEvent.class), "No registry present for GameEvent. This is a bug.");
+    /**
+     * Configured structures.
+     *
+     * @see io.papermc.paper.world.structure.ConfiguredStructure
+     */
+    Registry<io.papermc.paper.world.structure.ConfiguredStructure> CONFIGURED_STRUCTURE = new Registry<io.papermc.paper.world.structure.ConfiguredStructure>() {
+
+        @Nullable
+        @Override
+        public io.papermc.paper.world.structure.ConfiguredStructure get(@NotNull NamespacedKey key) {
+            return null;
+        }
+
+        @NotNull
+        @Override
+        public Stream<io.papermc.paper.world.structure.ConfiguredStructure> stream() {
+            return Stream.empty();
+        }
+
+        @NotNull
+        @Override
+        public Iterator<io.papermc.paper.world.structure.ConfiguredStructure> iterator() {
+            return Collections.emptyIterator();
+        }
+    };
+    /**
+     * Potion effect types.
+     *
+     * @see PotionEffectType
+     */
+    Registry<PotionEffectType> POTION_EFFECT_TYPE = new Registry<PotionEffectType>() {
+
+        @Nullable
+        @Override
+        public PotionEffectType get(@NotNull NamespacedKey key) {
+            return PotionEffectType.getByKey(key);
+        }
+
+        @NotNull
+        @Override
+        public Stream<PotionEffectType> stream() {
+            return Arrays.stream(PotionEffectType.values());
+        }
+
+        @NotNull
+        @Override
+        public Iterator<PotionEffectType> iterator() {
+            return Arrays.stream(PotionEffectType.values()).iterator();
+        }
+    };
     /**
      * Get the object by its key.
      *

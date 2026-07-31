@@ -1184,6 +1184,43 @@ public abstract class MixinServerGamePacketListenerImpl implements InjectionServ
             this.handleCommand(s);
         } else if (this.player.getChatVisibility() != ChatVisiblity.SYSTEM) {
             Player thisPlayer = this.getCraftPlayer();
+            // Paper start - AsyncChatEvent pipeline
+            if (async && io.papermc.paper.event.player.AsyncChatEvent.getHandlerList().getRegisteredListeners().length != 0) {
+                net.kyori.adventure.text.Component componentMessage = net.kyori.adventure.text.Component.text(s);
+                io.papermc.paper.event.player.AsyncChatEvent event = new io.papermc.paper.event.player.AsyncChatEvent(
+                        true,
+                        thisPlayer,
+                        (java.util.Set<net.kyori.adventure.audience.Audience>) (java.util.Set<?>) new LazyPlayerSet(this.server),
+                        io.papermc.paper.chat.ChatRenderer.viewerUnaware((source, sourceDisplayName, message) ->
+                                net.kyori.adventure.text.Component.text("<").append(sourceDisplayName).append(net.kyori.adventure.text.Component.text("> ")).append(message)),
+                        componentMessage,
+                        componentMessage,
+                        net.kyori.adventure.chat.SignedMessage.system(s, componentMessage));
+                this.cserver.getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
+                    return;
+                }
+                net.kyori.adventure.text.Component rendered = event.renderer().render(
+                        thisPlayer,
+                        net.kyori.adventure.text.Component.text(thisPlayer.getDisplayName()),
+                        event.message(),
+                        net.kyori.adventure.audience.Audience.empty());
+                s = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().serialize(rendered);
+                if (((LazyPlayerSet) (java.util.Set<?>) event.viewers()).isLazy()) {
+                    for (ServerPlayer recipient : server.getPlayerList().players) {
+                        recipient.getBukkitEntity().sendMessage(player.getUUID(), s);
+                    }
+                } else {
+                    for (net.kyori.adventure.audience.Audience recipient : event.viewers()) {
+                        if (recipient instanceof Player) {
+                            ((Player) recipient).sendMessage(player.getUUID(), s);
+                        }
+                    }
+                }
+                Bukkit.getConsoleSender().sendMessage(s);
+                return;
+            }
+            // Paper end
             AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(async, thisPlayer, s, new LazyPlayerSet(this.server));
             String originalFormat = event.getFormat(), originalMessage = event.getMessage();
             this.cserver.getPluginManager().callEvent(event);

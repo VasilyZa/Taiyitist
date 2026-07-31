@@ -92,4 +92,46 @@ public interface UnsafeValues {
 
     @Nullable
     FeatureFlag getFeatureFlag(@NotNull NamespacedKey key);
+
+    // Paper start
+    @NotNull
+    default net.kyori.adventure.text.Component resolveWithContext(
+        @NotNull net.kyori.adventure.text.Component input,
+        @Nullable org.bukkit.command.CommandSender context,
+        @Nullable org.bukkit.entity.Entity scoreboardSubject,
+        boolean bypassPermissions
+    ) throws java.io.IOException {
+        return input;
+    }
+
+    @NotNull
+    default net.kyori.adventure.text.flattener.ComponentFlattener componentFlattener() {
+        return net.kyori.adventure.text.flattener.ComponentFlattener.basic();
+    }
+
+    @NotNull
+    default net.kyori.adventure.text.serializer.plain.PlainComponentSerializer plainComponentSerializer() {
+        return net.kyori.adventure.text.serializer.plain.PlainComponentSerializer.plain();
+    }
+
+    @NotNull
+    default net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer plainTextSerializer() {
+        return net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText();
+    }
+
+    @NotNull
+    default net.kyori.adventure.text.serializer.gson.GsonComponentSerializer gsonComponentSerializer() {
+        return net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson();
+    }
+
+    @NotNull
+    default net.kyori.adventure.text.serializer.gson.GsonComponentSerializer colorDownsamplingGsonComponentSerializer() {
+        return net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.colorDownsamplingGson();
+    }
+
+    @NotNull
+    default net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer legacyComponentSerializer() {
+        return net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection();
+    }
+    // Paper end
 }

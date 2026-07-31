@@ -6,109 +6,75 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Called when a world border changes its bounds, either over time, or instantly.
- */
 public class WorldBorderBoundsChangeEvent extends WorldBorderEvent implements Cancellable {
+   private static final HandlerList HANDLER_LIST = new HandlerList();
+   private WorldBorderBoundsChangeEvent.Type type;
+   private final double oldSize;
+   private double newSize;
+   private long duration;
+   private boolean cancelled;
 
-    private static final HandlerList HANDLER_LIST = new HandlerList();
+   public WorldBorderBoundsChangeEvent(
+      @NotNull World world, @NotNull WorldBorder worldBorder, @NotNull WorldBorderBoundsChangeEvent.Type type, double oldSize, double newSize, long duration
+   ) {
+      super(world, worldBorder);
+      this.type = type;
+      this.oldSize = oldSize;
+      this.newSize = newSize;
+      this.duration = duration;
+   }
 
-    private Type type;
-    private final double oldSize;
-    private double newSize;
-    private long duration;
-    private boolean cancelled;
+   @NotNull
+   public WorldBorderBoundsChangeEvent.Type getType() {
+      return this.type;
+   }
 
-    public WorldBorderBoundsChangeEvent(@NotNull World world, @NotNull WorldBorder worldBorder, @NotNull Type type, double oldSize, double newSize, long duration) {
-        super(world, worldBorder);
-        this.type = type;
-        this.oldSize = oldSize;
-        this.newSize = newSize;
-        this.duration = duration;
-    }
+   public double getOldSize() {
+      return this.oldSize;
+   }
 
-    /**
-     * Gets if this change is an instant change or over-time change.
-     *
-     * @return the change type
-     */
-    @NotNull
-    public Type getType() {
-        return type;
-    }
+   public double getNewSize() {
+      return this.newSize;
+   }
 
-    /**
-     * Gets the old size or the world border.
-     *
-     * @return the old size
-     */
-    public double getOldSize() {
-        return oldSize;
-    }
+   public void setNewSize(double newSize) {
+      this.newSize = Math.min(6.0E7, Math.max(1.0, newSize));
+   }
 
-    /**
-     * Gets the new size of the world border.
-     *
-     * @return the new size
-     */
-    public double getNewSize() {
-        return newSize;
-    }
+   public long getDuration() {
+      return this.duration;
+   }
 
-    /**
-     * Sets the new size of the world border.
-     *
-     * @param newSize the new size
-     */
-    public void setNewSize(double newSize) {
-        // PAIL: TODO: Magic Values
-        this.newSize = Math.min(6.0E7D, Math.max(1.0D, newSize));
-    }
+   public void setDuration(long duration) {
+      this.duration = Math.min(9223372036854775L, Math.max(0L, duration));
+      if (duration >= 0L && this.type == WorldBorderBoundsChangeEvent.Type.INSTANT_MOVE) {
+         this.type = WorldBorderBoundsChangeEvent.Type.STARTED_MOVE;
+      }
+   }
 
-    /**
-     * Gets the time in milliseconds for the change. Will be 0 if instant.
-     *
-     * @return the time in milliseconds for the change
-     */
-    public long getDuration() {
-        return duration;
-    }
+   @Override
+   public boolean isCancelled() {
+      return this.cancelled;
+   }
 
-    /**
-     * Sets the time in milliseconds for the change. Will change {@link #getType()} to return
-     * {@link Type#STARTED_MOVE}.
-     *
-     * @param duration the time in milliseconds for the change
-     */
-    public void setDuration(long duration) {
-        // PAIL: TODO: Magic Values
-        this.duration = Math.min(9223372036854775L, Math.max(0L, duration));
-        if (duration >= 0 && type == Type.INSTANT_MOVE) type = Type.STARTED_MOVE;
-    }
+   @Override
+   public void setCancelled(boolean cancel) {
+      this.cancelled = cancel;
+   }
 
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
+   @NotNull
+   @Override
+   public HandlerList getHandlers() {
+      return HANDLER_LIST;
+   }
 
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
-    }
+   @NotNull
+   public static HandlerList getHandlerList() {
+      return HANDLER_LIST;
+   }
 
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
-        return HANDLER_LIST;
-    }
-
-    @NotNull
-    public static HandlerList getHandlerList() {
-        return HANDLER_LIST;
-    }
-
-    public enum Type {
-        STARTED_MOVE,
-        INSTANT_MOVE
-    }
+   public static enum Type {
+      STARTED_MOVE,
+      INSTANT_MOVE;
+   }
 }

@@ -6,11 +6,14 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -27,7 +30,7 @@ import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
 
 @SerializableAs("PlayerProfile")
-public final class CraftPlayerProfile implements PlayerProfile {
+public final class CraftPlayerProfile implements PlayerProfile, com.destroystokyo.paper.profile.PlayerProfile {
 
     @Nonnull
     public static GameProfile validateSkullProfile(@Nonnull GameProfile gameProfile) {
@@ -44,8 +47,8 @@ public final class CraftPlayerProfile implements PlayerProfile {
         return Iterables.getFirst(profile.getProperties().get(propertyName), null);
     }
 
-    private final UUID uniqueId;
-    private final String name;
+    private UUID uniqueId;
+    private String name;
 
     private final PropertyMap properties = new PropertyMap();
     private final CraftPlayerTextures textures = new CraftPlayerTextures(this);
@@ -92,8 +95,8 @@ public final class CraftPlayerProfile implements PlayerProfile {
         }
     }
 
-    void removeProperty(String propertyName) {
-        properties.removeAll(propertyName);
+    public boolean removeProperty(String propertyName) {
+        return !properties.removeAll(propertyName).isEmpty();
     }
 
     void rebuildDirtyProperties() {
@@ -120,9 +123,99 @@ public final class CraftPlayerProfile implements PlayerProfile {
     }
 
     @Override
-    public CompletableFuture<PlayerProfile> update() {
+    public CompletableFuture<com.destroystokyo.paper.profile.PlayerProfile> update() {
         return CompletableFuture.supplyAsync(this::getUpdatedProfile, Util.backgroundExecutor());
     }
+
+    // Paper start - com.destroystokyo.paper.profile.PlayerProfile implementation
+    @Override
+    @Deprecated
+    public String setName(@Nullable String name) {
+        String previous = this.name;
+        this.name = name;
+        return previous;
+    }
+
+    @Override
+    @Nullable
+    public UUID getId() {
+        return this.uniqueId;
+    }
+
+    @Override
+    @Deprecated
+    @Nullable
+    public UUID setId(@Nullable UUID uniqueId) {
+        UUID previous = this.uniqueId;
+        this.uniqueId = uniqueId;
+        return previous;
+    }
+
+    @Override
+    public Set<com.destroystokyo.paper.profile.ProfileProperty> getProperties() {
+        rebuildDirtyProperties();
+        Set<com.destroystokyo.paper.profile.ProfileProperty> result = new HashSet<>();
+        for (Property property : properties.values()) {
+            result.add(toProfileProperty(property));
+        }
+        return result;
+    }
+
+    @Override
+    public boolean hasProperty(@Nullable String propertyName) {
+        return properties.containsKey(propertyName);
+    }
+
+    @Override
+    public void setProperty(@Nonnull com.destroystokyo.paper.profile.ProfileProperty property) {
+        Preconditions.checkNotNull(property, "property");
+        setProperty(property.getName(), new Property(property.getName(), property.getValue(), property.getSignature()));
+    }
+
+    @Override
+    public void setProperties(@Nonnull Collection<com.destroystokyo.paper.profile.ProfileProperty> properties) {
+        Preconditions.checkNotNull(properties, "properties");
+        for (com.destroystokyo.paper.profile.ProfileProperty property : properties) {
+            setProperty(property);
+        }
+    }
+
+    @Override
+    public void clearProperties() {
+        properties.clear();
+    }
+
+    @Override
+    public boolean completeFromCache() {
+        return completeFromCache(false, false);
+    }
+
+    @Override
+    public boolean completeFromCache(boolean onlineMode) {
+        return completeFromCache(onlineMode, false);
+    }
+
+    @Override
+    public boolean completeFromCache(boolean onlineMode, boolean checkName) {
+        return isComplete();
+    }
+
+    @Override
+    public boolean complete(boolean onlineMode) {
+        return completeFromCache(onlineMode);
+    }
+
+    @Override
+    public boolean complete(boolean onlineMode, boolean checkName) {
+        return completeFromCache(onlineMode, checkName);
+    }
+
+    private static com.destroystokyo.paper.profile.ProfileProperty toProfileProperty(Property property) {
+        return property.hasSignature()
+                ? new com.destroystokyo.paper.profile.ProfileProperty(property.getName(), property.getValue(), property.getSignature())
+                : new com.destroystokyo.paper.profile.ProfileProperty(property.getName(), property.getValue());
+    }
+    // Paper end
 
     private CraftPlayerProfile getUpdatedProfile() {
         DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();

@@ -7,70 +7,50 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Called when a world border's center is changed.
- */
 public class WorldBorderCenterChangeEvent extends WorldBorderEvent implements Cancellable {
+   private static final HandlerList HANDLER_LIST = new HandlerList();
+   private final Location oldCenter;
+   private Location newCenter;
+   private boolean cancelled;
 
-    private static final HandlerList HANDLER_LIST = new HandlerList();
+   public WorldBorderCenterChangeEvent(@NotNull World world, @NotNull WorldBorder worldBorder, @NotNull Location oldCenter, @NotNull Location newCenter) {
+      super(world, worldBorder);
+      this.oldCenter = oldCenter;
+      this.newCenter = newCenter;
+   }
 
-    private final Location oldCenter;
-    private Location newCenter;
-    private boolean cancelled;
+   @NotNull
+   public Location getOldCenter() {
+      return this.oldCenter;
+   }
 
-    public WorldBorderCenterChangeEvent(@NotNull World world, @NotNull WorldBorder worldBorder, @NotNull Location oldCenter, @NotNull Location newCenter) {
-        super(world, worldBorder);
-        this.oldCenter = oldCenter;
-        this.newCenter = newCenter;
-    }
+   @NotNull
+   public Location getNewCenter() {
+      return this.newCenter;
+   }
 
-    /**
-     * Gets the original center location of the world border.
-     *
-     * @return the old center
-     */
-    @NotNull
-    public Location getOldCenter() {
-        return oldCenter;
-    }
+   public void setNewCenter(@NotNull Location newCenter) {
+      this.newCenter = newCenter;
+   }
 
-    /**
-     * Gets the new center location for the world border.
-     *
-     * @return the new center
-     */
-    @NotNull
-    public Location getNewCenter() {
-        return newCenter;
-    }
+   @Override
+   public boolean isCancelled() {
+      return this.cancelled;
+   }
 
-    /**
-     * Sets the new center location for the world border. Y coordinate is ignored.
-     *
-     * @param newCenter the new center
-     */
-    public void setNewCenter(@NotNull Location newCenter) {
-        this.newCenter = newCenter;
-    }
+   @Override
+   public void setCancelled(boolean cancel) {
+      this.cancelled = cancel;
+   }
 
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
+   @NotNull
+   @Override
+   public HandlerList getHandlers() {
+      return HANDLER_LIST;
+   }
 
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
-    }
-
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
-        return HANDLER_LIST;
-    }
-
-    @NotNull
-    public static HandlerList getHandlerList() {
-        return HANDLER_LIST;
-    }
+   @NotNull
+   public static HandlerList getHandlerList() {
+      return HANDLER_LIST;
+   }
 }
