@@ -8,6 +8,7 @@ import net.minecraft.world.inventory.BlastFurnaceMenu;
 import net.minecraft.world.inventory.BrewingStandMenu;
 import net.minecraft.world.inventory.CartographyTableMenu;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.DispenserMenu;
 import net.minecraft.world.inventory.EnchantmentMenu;
@@ -18,6 +19,7 @@ import net.minecraft.world.inventory.LecternMenu;
 import net.minecraft.world.inventory.LoomMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ShulkerBoxMenu;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
@@ -43,6 +45,12 @@ public class CraftContainer extends AbstractContainerMenu {
         net.minecraft.world.entity.player.Inventory bottom = (net.minecraft.world.entity.player.Inventory) ((CraftInventory) view.getBottomInventory()).getInventory();
         cachedType = view.getType();
         setupSlots(top, bottom, player);
+        // 自定义铁砧：把实际的 AnvilMenu 注入 AnvilInventory，使 getRenameText() 可读
+        if (cachedType == InventoryType.ANVIL
+                && view.getTopInventory() instanceof CraftInventoryAnvil customAnvil
+                && delegate instanceof AnvilMenu anvilMenu) {
+            customAnvil.taiyitist$setContainer(anvilMenu);
+        }
     }
 
     public CraftContainer(final Inventory inventory, final net.minecraft.world.entity.player.Player player, int id) {
@@ -194,6 +202,10 @@ public class CraftContainer extends AbstractContainerMenu {
                 delegate = new HopperMenu(windowId, bottom, top);
                 break;
             case ANVIL:
+                // 自定义铁砧：使用真正的 AnvilMenu 子类作为代理，
+                // 否则 handleRenameItem 的 instanceof AnvilMenu 判断失败，改名文本无法写入
+                delegate = new AnvilContainer(top, bottom, windowId);
+                break;
             case SMITHING:
                 setupAnvil(top, bottom); // SPIGOT-6783 - manually set up slots so we can use the delegated inventory and not the automatically created one
                 break;
@@ -243,10 +255,14 @@ public class CraftContainer extends AbstractContainerMenu {
             case WORKBENCH:
                 delegate = new CraftingMenu(windowId, bottom);
                 break;
-            case ANVIL:
-                delegate = new AnvilMenu(windowId, bottom);
-                break;
         }
+    }
+
+    /**
+     * 供包外(如包监听 mixin)访问实际代理菜单
+     */
+    public AbstractContainerMenu bridge$getDelegate() {
+        return delegate;
     }
 
     private void setupWorkbench(Container top, Container bottom) {
@@ -330,5 +346,42 @@ public class CraftContainer extends AbstractContainerMenu {
     @Override
     public MenuType<?> getType() {
         return getNotchInventoryType(view.getTopInventory());
+    }
+
+    /**
+     * 自定义铁砧容器：继承 AnvilMenu，使玩家改名包能写入 itemName，
+     * 输入/结果槽直接使用自定义容器(0/1=输入，2=结果)。
+     */
+    public static class AnvilContainer extends AnvilMenu {
+
+        private final Container inventory;
+
+        public AnvilContainer(Container inventory, net.minecraft.world.entity.player.Inventory playerInventory, int windowId) {
+            super(windowId, playerInventory, ContainerLevelAccess.NULL);
+            this.inventory = inventory;
+            this.slots.clear();
+            this.addSlot(new Slot(inventory, 0, 27, 47));
+            this.addSlot(new Slot(inventory, 1, 76, 47));
+            this.addSlot(new Slot(inventory, 2, 134, 47));
+            for (int row = 0; row < 3; ++row) {
+                for (int col = 0; col < 9; ++col) {
+                    this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                }
+            }
+            for (int col = 0; col < 9; ++col) {
+                this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
+            }
+        }
+
+        @Override
+        public boolean stillValid(net.minecraft.world.entity.player.Player player) {
+            // 虚拟铁砧不依赖真实方块，始终可操作
+            return true;
+        }
+
+        @Override
+        public void createResult() {
+            // 自定义铁砧：结果槽内容由插件控制，不做原版修复计算
+        }
     }
 }

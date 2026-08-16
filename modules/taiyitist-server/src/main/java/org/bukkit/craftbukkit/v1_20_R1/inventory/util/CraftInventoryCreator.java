@@ -5,6 +5,7 @@ import java.util.Map;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftInventoryAnvil;
 
 public final class CraftInventoryCreator {
 
@@ -24,7 +25,17 @@ public final class CraftInventoryCreator {
         converterMap.put(InventoryType.PLAYER, DEFAULT_CONVERTER);
         converterMap.put(InventoryType.MERCHANT, DEFAULT_CONVERTER);
         converterMap.put(InventoryType.ENDER_CHEST, DEFAULT_CONVERTER);
-        converterMap.put(InventoryType.ANVIL, DEFAULT_CONVERTER);
+        converterMap.put(InventoryType.ANVIL, new InventoryConverter() {
+            @Override
+            public Inventory createInventory(InventoryHolder holder, InventoryType type) {
+                return new CraftInventoryAnvil(holder, type);
+            }
+
+            @Override
+            public Inventory createInventory(InventoryHolder holder, InventoryType type, String title) {
+                return new CraftInventoryAnvil(holder, type, title);
+            }
+        });
         converterMap.put(InventoryType.SMITHING, DEFAULT_CONVERTER);
         converterMap.put(InventoryType.BEACON, DEFAULT_CONVERTER);
         converterMap.put(InventoryType.HOPPER, new CraftTileInventoryConverter.Hopper());

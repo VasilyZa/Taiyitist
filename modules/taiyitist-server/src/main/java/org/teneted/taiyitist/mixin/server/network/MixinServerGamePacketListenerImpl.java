@@ -56,6 +56,7 @@ import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
@@ -84,6 +85,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.Slot;
@@ -107,6 +109,7 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_20_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftContainer;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftInventoryView;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftChatMessage;
@@ -1722,6 +1725,20 @@ public abstract class MixinServerGamePacketListenerImpl implements InjectionServ
     private void taiyitist$noEnchant(ServerboundContainerButtonClickPacket packetIn, CallbackInfo ci) {
         if (player.isImmobile()) {
             ci.cancel();
+        }
+    }
+
+    /**
+     * 自定义铁砧(CraftContainer)的改名：原版 handleRenameItem 只认 AnvilMenu，
+     * 这里在 vanilla 处理之后，把改名文本写入 CraftContainer 内的 AnvilContainer
+     */
+    @Inject(method = "handleRenameItem", at = @At("RETURN"))
+    private void taiyitist$anvilRenameItem(ServerboundRenameItemPacket packet, CallbackInfo ci) {
+        if (this.player.containerMenu instanceof CraftContainer craftContainer) {
+            if (craftContainer.bridge$getDelegate() instanceof AnvilMenu anvilMenu) {
+                anvilMenu.setItemName(packet.getName());
+                this.player.containerMenu.broadcastChanges();
+            }
         }
     }
 
