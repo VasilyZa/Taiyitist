@@ -1,6 +1,5 @@
 package org.teneted.taiyitist.injection.server;
 
-import jline.console.ConsoleReader;
 import joptsimple.OptionSet;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.WorldLoader;
@@ -13,6 +12,7 @@ import net.minecraft.world.level.storage.WorldData;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
+import org.jline.reader.LineReader;
 
 public interface InjectionMinecraftServer {
 
@@ -65,7 +65,7 @@ public interface InjectionMinecraftServer {
 
     }
 
-    default ConsoleReader bridge$reader() {
+    default LineReader bridge$reader() {
         return null;
     }
 

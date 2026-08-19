@@ -1561,6 +1561,21 @@ public interface Server extends PluginMessageRecipient {
     public double[] getTPS();
 
     /**
+     * Gets the active command map.
+     *
+     * @return the active command map
+     */
+    @NotNull
+    org.bukkit.command.CommandMap getCommandMap();
+
+    /**
+     * Checks if the server is in the process of shutting down.
+     *
+     * @return true if shutdown has started
+     */
+    boolean isStopping();
+
+    /**
      * Get the advancement specified by this key.
      *
      * @param key unique advancement key

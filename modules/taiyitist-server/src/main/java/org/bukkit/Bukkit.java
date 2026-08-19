@@ -873,6 +873,25 @@ public final class Bukkit {
     }
 
     /**
+     * Gets the active command map.
+     *
+     * @return the active command map
+     */
+    @NotNull
+    public static org.bukkit.command.CommandMap getCommandMap() {
+        return server.getCommandMap();
+    }
+
+    /**
+     * Checks if the server is in the process of shutting down.
+     *
+     * @return true if shutdown has started
+     */
+    public static boolean isStopping() {
+        return server.isStopping();
+    }
+
+    /**
      * Writes loaded players to disk.
      */
     public static void savePlayers() {

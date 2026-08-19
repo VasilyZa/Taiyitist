@@ -23,10 +23,15 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.Main;
 import org.bukkit.craftbukkit.v1_20_R1.util.ForwardLogHandler;
+import org.bukkit.craftbukkit.v1_20_R1.util.TerminalConsoleWriterThread;
 import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.PluginLoadOrder;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.UserInterruptException;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
@@ -71,10 +76,62 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         }
         global.addHandler(new ForwardLogHandler());
         final org.apache.logging.log4j.Logger logger = LogManager.getRootLogger();
+        final java.io.OutputStream terminalOutput = System.out;
 
         System.setOut(IoBuilder.forLogger(logger).setLevel(org.apache.logging.log4j.Level.INFO).buildPrintStream());
         System.setErr(IoBuilder.forLogger(logger).setLevel(org.apache.logging.log4j.Level.WARN).buildPrintStream());
+
+        if (Main.useJline && this.bridge$reader() != null) {
+            if (logger instanceof org.apache.logging.log4j.core.Logger coreLogger) {
+                final org.apache.logging.log4j.core.Appender consoleAppender = coreLogger.getAppenders().get("SysOut");
+                if (consoleAppender != null) {
+                    coreLogger.removeAppender(consoleAppender);
+                }
+            }
+
+            TerminalConsoleWriterThread writer = new TerminalConsoleWriterThread(terminalOutput, this.bridge$reader());
+            writer.start();
+        }
         // CraftBukkit end
+    }
+
+    @Redirect(method = "initServer", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;start()V", ordinal = 0), require = 0)
+    private void taiyitist$startConsoleThread(Thread vanillaThread) {
+        LineReader consoleReader = this.bridge$reader();
+        if (!Main.useJline || consoleReader == null) {
+            vanillaThread.start();
+            return;
+        }
+
+        DedicatedServer server = (DedicatedServer) (Object) this;
+        Thread consoleThread = new Thread("Server console handler") {
+            @Override
+            public void run() {
+                try {
+                    while (!server.isStopped() && server.isRunning()) {
+                        String line = consoleReader.readLine("> ");
+                        if (line == null) {
+                            Thread.sleep(50L);
+                            continue;
+                        }
+                        if (!line.trim().isEmpty()) {
+                            server.handleConsoleInput(line, server.createCommandSourceStack());
+                        }
+                    }
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                } catch (EndOfFileException endOfFile) {
+                    // Ctrl-D ends the current input stream; the server itself remains alive.
+                } catch (UserInterruptException interrupt) {
+                    server.halt(false);
+                } catch (Exception exception) {
+                    TaiyitistMod.LOGGER.error("Exception handling console input", exception);
+                }
+            }
+        };
+        consoleThread.setDaemon(vanillaThread.isDaemon());
+        consoleThread.setUncaughtExceptionHandler(vanillaThread.getUncaughtExceptionHandler());
+        consoleThread.start();
     }
 
     @Inject(method = "getPluginNames", at = @At("RETURN"), cancellable = true)

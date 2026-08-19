@@ -11,7 +11,6 @@
     "com.googlecode.json-simple:json-simple:1.1.1": "c9ad4a0850ab676c5c64461a05ca524cdfff59f1",
     "org.apache.logging.log4j:log4j-jul:2.19.0": "2e6def13971ff796bc59cd8e095a4b3dfb66a87f",
     "net.md-5:SpecialSource:1.11.3": "d98a3d1fa1614490574bc7ae939203c1d2259b2d",
-    "org.jline:jline-terminal-jansi:3.12.1": "b288ab8a31970056457721817ee7a812beff3db9",
     "jline:jline:2.12.1": "6995a145068fdc69d291e597531a414311100e72",
     "org.apache.maven:maven-resolver-provider:3.8.5": "91f423a4584f2fc7f45cac5b0b58edc33c077249",
     "org.apache.maven.resolver:maven-resolver-connector-basic:1.7.3": "ace036615ca70d065cbf4966ea6eb1076565d902",
@@ -42,6 +41,7 @@
     "com.mohistmc:tools:0.5.1": "8555f6e7e7691b4981e4bc42a48929a0d70ff2f1",
     "com.mohistmc:dynamicenum:0.3.1": "e94c6bd4f48ecc6d9bef92344dcd06fd6e28cbb8",
     "com.mohistmc:librariesvault:1.20.2": "6abb3ef7f56895e6f592e28ef8157100f99cf014",
+    "org.jline:jline-reader:3.21.0": "9cd5c76dd2a47e9e0e7ab39821c0f62fa46e8581",
     "io.izzel.arclight:mixin-tools:1.2.4": "44b8f91fb1eeb8a720efdc2ca56c47e6a13d6aa9",
     "org.jline:jline-terminal:3.21.0": "047579f05a0002f9c561cb10dcf2f744976c49ac",
     "org.jline:jline-terminal-jansi:3.21.0": "27086834f4d9951f9c2c3b299782e114b56fcf51",
@@ -51,9 +51,6 @@
     "io.izzel:tools:1.3.0": "69a3c982178154b3037077b8fc5396816cdcad3a"
   },
   "fabricExtra": {
-    "net.minecrell:terminalconsoleappender:1.2.0": "96d02cd3b384ff015a8fef4223bcb4ccf1717c95",
-    "org.jline:jline-terminal:3.12.1": "c777448314e050d980a6b697c140f3bfe9eb7416",
-    "org.jline:jline-reader:3.12.1": "4382ab1382c7b6f379377ed5f665dc2f6e1218bc",
     "org.fusesource.jansi:jansi:1.18": "d9205bbcd4b5f9cd1effe752d18f73bd942d783f",
     "org.apache.maven:maven-artifact:3.8.5": "4433f50c07debefaed0553bd0068f4f48d449313",
     "net.fabricmc:intermediary:1.20.1": "97d0bff94981e37bd7a4362deee53c9a84e3fb21",

@@ -27,7 +27,6 @@ import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jline.console.ConsoleReader;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -88,6 +87,10 @@ import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.PluginLoadOrder;
 import org.jetbrains.annotations.Nullable;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -209,7 +212,9 @@ public abstract class MixinMinecraftServer extends ReentrantBlockableEventLoop<T
     @Unique
     public org.bukkit.command.ConsoleCommandSender console;
     @Unique
-    public ConsoleReader reader;
+    public LineReader reader;
+    @Unique
+    private Terminal terminal;
     @TransformAccess(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC)
     private static int currentTick = 0; // Paper - Further improve tick loop
     @Unique
@@ -229,6 +234,9 @@ public abstract class MixinMinecraftServer extends ReentrantBlockableEventLoop<T
     private  static final int TICK_TIME = 1000000000 / TPS;
     private static final int SAMPLE_INTERVAL = 100;
     public final double[] recentTps = new double[ 3 ];
+    public final net.minecraft.server.MinecraftServer$TickTimes tickTimes5s = new net.minecraft.server.MinecraftServer$TickTimes(100);
+    public final net.minecraft.server.MinecraftServer$TickTimes tickTimes10s = new net.minecraft.server.MinecraftServer$TickTimes(200);
+    public final net.minecraft.server.MinecraftServer$TickTimes tickTimes60s = new net.minecraft.server.MinecraftServer$TickTimes(1200);
     // Spigot end
 
     public MixinMinecraftServer(String string) {
@@ -247,6 +255,40 @@ public abstract class MixinMinecraftServer extends ReentrantBlockableEventLoop<T
         Main.handleParser(parser, options);
         this.vanillaCommandDispatcher = worldStem.dataPackResources().getCommands();
         this.worldLoader = BukkitSnapshotCaptures.getDataLoadContext();
+        this.taiyitist$initConsole();
+    }
+
+    /**
+     * Configure the interactive reader before the player list registers the command completer.
+     * JLine must not be disabled just because the JVM has no {@link System#console()} (for
+     * example when launched from a service manager or a terminal multiplexer).
+     */
+    @Unique
+    private void taiyitist$initConsole() {
+        if (!Main.useJline) {
+            return;
+        }
+
+        try {
+            this.terminal = TerminalBuilder.builder()
+                    .name("Taiyitist")
+                    .system(true)
+                    .jansi(true)
+                    .build();
+            this.reader = LineReaderBuilder.builder()
+                    .terminal(this.terminal)
+                    .appName("Taiyitist")
+                    .variable(LineReader.HISTORY_FILE, new File(this.getServerDirectory(), ".console_history").toPath())
+                    .option(LineReader.Option.COMPLETE_IN_WORD, true)
+                    .completer(new org.bukkit.craftbukkit.v1_20_R1.command.ConsoleCommandCompleter())
+                    .build();
+            this.reader.setOpt(LineReader.Option.DISABLE_EVENT_EXPANSION);
+        } catch (Throwable failure) {
+            Main.useJline = false;
+            this.reader = null;
+            this.terminal = null;
+            LOGGER.warn("Unable to initialize the interactive console; falling back to plain input", failure);
+        }
     }
 
     @Inject(method = "stopServer", at = @At(value = "INVOKE", remap = false, ordinal = 0, shift = At.Shift.AFTER, target = "Lorg/slf4j/Logger;info(Ljava/lang/String;)V"))
@@ -310,7 +352,12 @@ public abstract class MixinMinecraftServer extends ReentrantBlockableEventLoop<T
                 this.nextTickTime += 50L;
                 this.startMetricsRecordingTick();
                 this.profiler.push("tick");
+                long tickStartNanos = System.nanoTime();
                 this.tickServer(this::haveTime);
+                long tickTimeNanos = System.nanoTime() - tickStartNanos;
+                this.tickTimes5s.add(this.tickCount, tickTimeNanos);
+                this.tickTimes10s.add(this.tickCount, tickTimeNanos);
+                this.tickTimes60s.add(this.tickCount, tickTimeNanos);
                 this.profiler.popPush("nextTickWait");
                 this.mayHaveDelayedTasks = true;
                 this.delayedTasksMaxNextTickTime = Math.max(Util.getMillis() + 50L, this.nextTickTime);
@@ -347,9 +394,17 @@ public abstract class MixinMinecraftServer extends ReentrantBlockableEventLoop<T
 
                 org.spigotmc.WatchdogThread.doStop(); // Spigot
                 // CraftBukkit start - Restore terminal to original settings
-                try {
-                    reader.getTerminal().restore();
-                } catch (Exception ignored) {
+                if (reader != null) {
+                    try {
+                        reader.getHistory().save();
+                    } catch (Exception ignored) {
+                    }
+                }
+                if (terminal != null) {
+                    try {
+                        terminal.close();
+                    } catch (Exception ignored) {
+                    }
                 }
                 // CraftBukkit end
                 this.onServerExit();
@@ -804,7 +859,7 @@ public abstract class MixinMinecraftServer extends ReentrantBlockableEventLoop<T
     }
 
     @Override
-    public ConsoleReader bridge$reader() {
+    public LineReader bridge$reader() {
         return reader;
     }
 

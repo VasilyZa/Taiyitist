@@ -197,7 +197,7 @@ import org.yaml.snakeyaml.representer.Representer;
  *      inferno.burningdeaths: true
  *</pre></blockquote>
  */
-public final class PluginDescriptionFile {
+public final class PluginDescriptionFile implements io.papermc.paper.plugin.configuration.PluginMeta {
     private static final Pattern VALID_NAME = Pattern.compile("^[A-Za-z0-9 _.-]+$");
     private static final ThreadLocal<Yaml> YAML = new ThreadLocal<Yaml>() {
         @Override
@@ -354,6 +354,11 @@ public final class PluginDescriptionFile {
         return provides;
     }
 
+    @Override
+    public List<String> getProvidedPlugins() {
+        return getProvides();
+    }
+
     /**
      * Gives the version of the plugin.
      * <ul>
@@ -402,6 +407,11 @@ public final class PluginDescriptionFile {
         return main;
     }
 
+    @Override
+    public String getMainClass() {
+        return getMain();
+    }
+
     /**
      * Gives a human-friendly description of the functionality the plugin
      * provides.
@@ -444,6 +454,11 @@ public final class PluginDescriptionFile {
     @NotNull
     public PluginLoadOrder getLoad() {
         return order;
+    }
+
+    @Override
+    public PluginLoadOrder getLoadOrder() {
+        return getLoad();
     }
 
     /**
@@ -557,6 +572,11 @@ public final class PluginDescriptionFile {
         return depend;
     }
 
+    @Override
+    public List<String> getPluginDependencies() {
+        return getDepend();
+    }
+
     /**
      * Gives a list of other plugins that the plugin requires for full
      * functionality. The {@link PluginManager} will make best effort to treat
@@ -585,6 +605,11 @@ public final class PluginDescriptionFile {
     @NotNull
     public List<String> getSoftDepend() {
         return softDepend;
+    }
+
+    @Override
+    public List<String> getPluginSoftDependencies() {
+        return getSoftDepend();
     }
 
     /**
@@ -617,6 +642,11 @@ public final class PluginDescriptionFile {
         return loadBefore;
     }
 
+    @Override
+    public List<String> getLoadBeforePlugins() {
+        return getLoadBefore();
+    }
+
     /**
      * Gives the token to prefix plugin-specific logging messages with.
      * <ul>
@@ -635,6 +665,11 @@ public final class PluginDescriptionFile {
     @Nullable
     public String getPrefix() {
         return prefix;
+    }
+
+    @Override
+    public String getLoggerPrefix() {
+        return getPrefix();
     }
 
     /**

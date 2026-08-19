@@ -128,4 +128,12 @@ public interface CommandMap {
      */
     @Nullable
     public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String cmdLine, @Nullable Location location) throws IllegalArgumentException;
+
+    /**
+     * Returns the commands currently registered in this map.
+     *
+     * @return known commands keyed by their labels and aliases
+     */
+    @NotNull
+    public java.util.Map<String, Command> getKnownCommands();
 }

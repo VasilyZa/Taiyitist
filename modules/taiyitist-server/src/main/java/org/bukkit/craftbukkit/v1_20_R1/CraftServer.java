@@ -257,6 +257,7 @@ import org.bukkit.util.StringUtil;
 import org.bukkit.util.permissions.DefaultPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.spigotmc.SpigotConfig;
+import org.teneted.taiyitist.injection.server.InjectionMinecraftServer;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -1950,8 +1951,14 @@ public final class CraftServer implements Server {
         return helpMap;
     }
 
+    @Override
     public SimpleCommandMap getCommandMap() {
         return commandMap;
+    }
+
+    @Override
+    public boolean isStopping() {
+        return ((InjectionMinecraftServer) this.getServer()).hasStopped();
     }
 
     @Override

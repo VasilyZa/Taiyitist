@@ -35,6 +35,14 @@ public interface Plugin extends TabExecutor {
     public PluginDescriptionFile getDescription();
 
     /**
+     * Gets the Paper-compatible metadata for this plugin.
+     *
+     * @return plugin metadata
+     */
+    @NotNull
+    public io.papermc.paper.plugin.configuration.PluginMeta getPluginMeta();
+
+    /**
      * Gets a {@link FileConfiguration} for this plugin, read through
      * "config.yml"
      * <p>

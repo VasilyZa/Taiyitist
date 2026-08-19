@@ -94,6 +94,9 @@ allprojects {
         // craftbukkit
         implementation("org.fusesource.jansi:jansi:1.18")
         implementation("jline:jline:2.14.6")
+        implementation("org.jline:jline-reader:3.21.0")
+        implementation("org.jline:jline-terminal:3.21.0")
+        implementation("org.jline:jline-terminal-jansi:3.21.0")
         implementation("com.googlecode.json-simple:json-simple:1.1.1")
         implementation("org.xerial:sqlite-jdbc:3.42.0.0")
         implementation("com.mysql:mysql-connector-j:8.0.33")

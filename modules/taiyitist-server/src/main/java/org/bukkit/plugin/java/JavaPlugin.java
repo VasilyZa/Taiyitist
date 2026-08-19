@@ -41,6 +41,7 @@ public abstract class JavaPlugin extends PluginBase {
     private Server server = null;
     private File file = null;
     private PluginDescriptionFile description = null;
+    private io.papermc.paper.plugin.configuration.PluginMeta pluginMeta = null;
     private File dataFolder = null;
     private ClassLoader classLoader = null;
     private boolean naggable = true;
@@ -128,6 +129,12 @@ public abstract class JavaPlugin extends PluginBase {
     @Override
     public final PluginDescriptionFile getDescription() {
         return description;
+    }
+
+    @NotNull
+    @Override
+    public final io.papermc.paper.plugin.configuration.PluginMeta getPluginMeta() {
+        return pluginMeta;
     }
 
     @NotNull
@@ -277,6 +284,7 @@ public abstract class JavaPlugin extends PluginBase {
         this.server = server;
         this.file = file;
         this.description = description;
+        this.pluginMeta = description;
         this.dataFolder = dataFolder;
         this.classLoader = classLoader;
         this.configFile = new File(dataFolder, "config.yml");
