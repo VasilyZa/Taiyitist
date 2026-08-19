@@ -1,6 +1,7 @@
 package org.bukkit;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -655,6 +656,104 @@ public interface World extends RegionAccessor, WorldInfo, PluginMessageRecipient
      */
     @NotNull
     public Collection<Entity> getEntitiesByClasses(@NotNull Class<?>... classes);
+
+    @NotNull
+    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location location, double radius) {
+        return getNearbyEntitiesByType(LivingEntity.class, location, radius, radius, radius);
+    }
+
+    @NotNull
+    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location location, double xzRadius, double yRadius) {
+        return getNearbyEntitiesByType(LivingEntity.class, location, xzRadius, yRadius, xzRadius);
+    }
+
+    @NotNull
+    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location location, double xRadius, double yRadius, double zRadius) {
+        return getNearbyEntitiesByType(LivingEntity.class, location, xRadius, yRadius, zRadius);
+    }
+
+    @NotNull
+    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location location, double radius, @Nullable Predicate<LivingEntity> predicate) {
+        return getNearbyEntitiesByType(LivingEntity.class, location, radius, radius, radius, predicate);
+    }
+
+    @NotNull
+    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location location, double xzRadius, double yRadius, @Nullable Predicate<LivingEntity> predicate) {
+        return getNearbyEntitiesByType(LivingEntity.class, location, xzRadius, yRadius, xzRadius, predicate);
+    }
+
+    @NotNull
+    public default Collection<LivingEntity> getNearbyLivingEntities(@NotNull Location location, double xRadius, double yRadius, double zRadius, @Nullable Predicate<LivingEntity> predicate) {
+        return getNearbyEntitiesByType(LivingEntity.class, location, xRadius, yRadius, zRadius, predicate);
+    }
+
+    @NotNull
+    public default Collection<Player> getNearbyPlayers(@NotNull Location location, double radius) {
+        return getNearbyEntitiesByType(Player.class, location, radius, radius, radius);
+    }
+
+    @NotNull
+    public default Collection<Player> getNearbyPlayers(@NotNull Location location, double xzRadius, double yRadius) {
+        return getNearbyEntitiesByType(Player.class, location, xzRadius, yRadius, xzRadius);
+    }
+
+    @NotNull
+    public default Collection<Player> getNearbyPlayers(@NotNull Location location, double xRadius, double yRadius, double zRadius) {
+        return getNearbyEntitiesByType(Player.class, location, xRadius, yRadius, zRadius);
+    }
+
+    @NotNull
+    public default Collection<Player> getNearbyPlayers(@NotNull Location location, double radius, @Nullable Predicate<Player> predicate) {
+        return getNearbyEntitiesByType(Player.class, location, radius, radius, radius, predicate);
+    }
+
+    @NotNull
+    public default Collection<Player> getNearbyPlayers(@NotNull Location location, double xzRadius, double yRadius, @Nullable Predicate<Player> predicate) {
+        return getNearbyEntitiesByType(Player.class, location, xzRadius, yRadius, xzRadius, predicate);
+    }
+
+    @NotNull
+    public default Collection<Player> getNearbyPlayers(@NotNull Location location, double xRadius, double yRadius, double zRadius, @Nullable Predicate<Player> predicate) {
+        return getNearbyEntitiesByType(Player.class, location, xRadius, yRadius, zRadius, predicate);
+    }
+
+    @NotNull
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> type, @NotNull Location location, double radius) {
+        return getNearbyEntitiesByType(type, location, radius, radius, radius, null);
+    }
+
+    @NotNull
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> type, @NotNull Location location, double xzRadius, double yRadius) {
+        return getNearbyEntitiesByType(type, location, xzRadius, yRadius, xzRadius, null);
+    }
+
+    @NotNull
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> type, @NotNull Location location, double xRadius, double yRadius, double zRadius) {
+        return getNearbyEntitiesByType(type, location, xRadius, yRadius, zRadius, null);
+    }
+
+    @NotNull
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> type, @NotNull Location location, double radius, @Nullable Predicate<T> predicate) {
+        return getNearbyEntitiesByType(type, location, radius, radius, radius, predicate);
+    }
+
+    @NotNull
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends T> type, @NotNull Location location, double xzRadius, double yRadius, @Nullable Predicate<T> predicate) {
+        return getNearbyEntitiesByType(type, location, xzRadius, yRadius, xzRadius, predicate);
+    }
+
+    @NotNull
+    @SuppressWarnings("unchecked")
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(@Nullable Class<? extends Entity> type, @NotNull Location location, double xRadius, double yRadius, double zRadius, @Nullable Predicate<T> predicate) {
+        Class<? extends Entity> entityType = type == null ? Entity.class : type;
+        List<T> nearby = new ArrayList<>();
+        for (Entity entity : getNearbyEntities(location, xRadius, yRadius, zRadius)) {
+            if (entityType.isAssignableFrom(entity.getClass()) && (predicate == null || predicate.test((T) entity))) {
+                nearby.add((T) entity);
+            }
+        }
+        return nearby;
+    }
 
     /**
      * Get a list of all players in this World

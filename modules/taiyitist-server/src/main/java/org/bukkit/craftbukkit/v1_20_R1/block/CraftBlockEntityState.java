@@ -17,15 +17,19 @@ public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockStat
 
     private final T tileEntity;
     private final T snapshot;
+    public boolean snapshotDisabled;
+    public static boolean DISABLE_SNAPSHOT = false;
 
     public CraftBlockEntityState(World world, T tileEntity) {
         super(world, tileEntity.getBlockPos(), tileEntity.getBlockState());
 
         this.tileEntity = tileEntity;
 
-        // copy tile entity data:
-        this.snapshot = this.createSnapshot(tileEntity);
-        this.load(snapshot);
+        this.snapshotDisabled = DISABLE_SNAPSHOT;
+        this.snapshot = DISABLE_SNAPSHOT ? this.tileEntity : this.createSnapshot(tileEntity);
+        if (this.snapshot != null) {
+            this.load(this.snapshot);
+        }
     }
 
     public void refreshSnapshot() {
@@ -111,6 +115,11 @@ public class CraftBlockEntityState<T extends BlockEntity> extends CraftBlockStat
     @Override
     public PersistentDataContainer getPersistentDataContainer() {
         return this.getSnapshot().bridge$persistentDataContainer();
+    }
+
+    @Override
+    public boolean isSnapshot() {
+        return !this.snapshotDisabled;
     }
 
     @Nullable

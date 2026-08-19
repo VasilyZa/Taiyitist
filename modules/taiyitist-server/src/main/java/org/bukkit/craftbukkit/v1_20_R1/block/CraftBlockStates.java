@@ -377,15 +377,25 @@ public final class CraftBlockStates {
     }
 
     public static BlockState getBlockState(Block block) {
+        return getBlockState(block, true);
+    }
+
+    public static BlockState getBlockState(Block block, boolean useSnapshot) {
         Preconditions.checkNotNull(block, "block is null");
         CraftBlock craftBlock = (CraftBlock) block;
         CraftWorld world = (CraftWorld) block.getWorld();
         BlockPos blockPosition = craftBlock.getPosition();
         net.minecraft.world.level.block.state.BlockState blockData = craftBlock.getNMS();
         BlockEntity tileEntity = craftBlock.getHandle().getBlockEntity(blockPosition);
-        CraftBlockState blockState = getBlockState(world, blockPosition, blockData, tileEntity);
-        blockState.setWorldHandle(craftBlock.getHandle()); // Inject the block's generator access
-        return blockState;
+        boolean previous = CraftBlockEntityState.DISABLE_SNAPSHOT;
+        CraftBlockEntityState.DISABLE_SNAPSHOT = !useSnapshot;
+        try {
+            CraftBlockState blockState = getBlockState(world, blockPosition, blockData, tileEntity);
+            blockState.setWorldHandle(craftBlock.getHandle()); // Inject the block's generator access
+            return blockState;
+        } finally {
+            CraftBlockEntityState.DISABLE_SNAPSHOT = previous;
+        }
     }
 
     public static BlockState getBlockState(Material material, @Nullable CompoundTag blockEntityTag) {

@@ -273,6 +273,16 @@ public interface Block extends Metadatable, Translatable {
     BlockState getState();
 
     /**
+     * Captures the current state of this block, optionally without creating a
+     * snapshot of its tile entity.
+     *
+     * @param useSnapshot whether tile entity data should be copied
+     * @return the current block state
+     */
+    @NotNull
+    BlockState getState(boolean useSnapshot);
+
+    /**
      * Returns the biome that this block resides in
      *
      * @return Biome type containing this block

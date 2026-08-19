@@ -244,6 +244,73 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
         return -1;
     }
 
+    /**
+     * Clones this item stack with a quantity of one.
+     *
+     * @return the cloned item stack
+     */
+    @NotNull
+    public ItemStack asOne() {
+        return asQuantity(1);
+    }
+
+    /**
+     * Clones this item stack with the specified quantity.
+     *
+     * @param qty quantity of the cloned item stack
+     * @return the cloned item stack
+     */
+    @NotNull
+    public ItemStack asQuantity(int qty) {
+        ItemStack clone = clone();
+        clone.setAmount(qty);
+        return clone;
+    }
+
+    /**
+     * Adds one to this item stack without exceeding its maximum stack size.
+     *
+     * @return this item stack
+     */
+    @NotNull
+    public ItemStack add() {
+        return add(1);
+    }
+
+    /**
+     * Adds the specified quantity without exceeding the maximum stack size.
+     *
+     * @param qty quantity to add
+     * @return this item stack
+     */
+    @NotNull
+    public ItemStack add(int qty) {
+        setAmount(Math.min(getMaxStackSize(), getAmount() + qty));
+        return this;
+    }
+
+    /**
+     * Subtracts one from this item stack.
+     *
+     * @return this item stack
+     */
+    @NotNull
+    public ItemStack subtract() {
+        return subtract(1);
+    }
+
+    /**
+     * Subtracts the specified quantity without reducing the amount below zero.
+     *
+     * @param qty quantity to subtract
+     * @return this item stack
+     */
+    @NotNull
+    public ItemStack subtract(int qty) {
+        setAmount(Math.max(0, getAmount() - qty));
+        return this;
+    }
+
     private void createData(final byte data) {
         this.data = type.getNewData(data);
     }

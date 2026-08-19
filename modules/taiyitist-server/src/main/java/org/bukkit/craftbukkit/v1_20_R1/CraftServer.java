@@ -552,6 +552,11 @@ public final class CraftServer implements Server {
     }
 
     @Override
+    public String getMinecraftVersion() {
+        return console.getServerVersion();
+    }
+
+    @Override
     public List<CraftPlayer> getOnlinePlayers() {
         // Banner start - refresh online players
         this.playerView = Collections.unmodifiableList(Lists.transform(playerList.players, new Function<ServerPlayer, CraftPlayer>() {

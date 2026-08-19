@@ -3,7 +3,10 @@ package org.bukkit.generator;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.RegionAccessor;
+import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -53,4 +56,51 @@ public interface LimitedRegion extends RegionAccessor {
      */
     @NotNull
     List<BlockState> getTileEntities();
+
+    default void setBlockData(@NotNull Vector vector, @NotNull BlockData data) {
+        setBlockData(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ(), data);
+    }
+
+    void setBlockState(int x, int y, int z, @NotNull BlockState state);
+
+    default void setBlockState(@NotNull Vector location, @NotNull BlockState state) {
+        setBlockState(location.getBlockX(), location.getBlockY(), location.getBlockZ(), state);
+    }
+
+    @NotNull
+    default BlockState getBlockState(@NotNull Vector location) {
+        return getBlockState(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    void scheduleBlockUpdate(int x, int y, int z);
+
+    default void scheduleBlockUpdate(@NotNull Vector location) {
+        scheduleBlockUpdate(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    void scheduleFluidUpdate(int x, int y, int z);
+
+    default void scheduleFluidUpdate(@NotNull Vector location) {
+        scheduleFluidUpdate(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    @NotNull
+    World getWorld();
+
+    @NotNull
+    default BlockData getBlockData(@NotNull Vector vector) {
+        return getBlockData(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
+    }
+
+    int getCenterChunkX();
+
+    default int getCenterBlockX() {
+        return getCenterChunkX() << 4;
+    }
+
+    int getCenterChunkZ();
+
+    default int getCenterBlockZ() {
+        return getCenterChunkZ() << 4;
+    }
 }

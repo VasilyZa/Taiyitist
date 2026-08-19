@@ -349,6 +349,11 @@ public class CraftBlock implements Block {
     }
 
     @Override
+    public org.bukkit.block.BlockState getState(boolean useSnapshot) {
+        return CraftBlockStates.getBlockState(this, useSnapshot);
+    }
+
+    @Override
     public Biome getBiome() {
         return getWorld().getBiome(getX(), getY(), getZ());
     }

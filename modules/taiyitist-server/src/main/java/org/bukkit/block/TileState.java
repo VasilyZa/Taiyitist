@@ -36,4 +36,12 @@ public interface TileState extends BlockState, PersistentDataHolder {
     @NotNull
     @Override
     PersistentDataContainer getPersistentDataContainer();
+
+    /**
+     * Checks whether this state is a snapshot or a live representation of the
+     * underlying tile entity.
+     *
+     * @return true if this state is a snapshot
+     */
+    boolean isSnapshot();
 }

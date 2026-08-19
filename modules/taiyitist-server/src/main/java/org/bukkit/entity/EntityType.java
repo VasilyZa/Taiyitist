@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public enum EntityType implements Keyed, Translatable {
+public enum EntityType implements Keyed, Translatable, net.kyori.adventure.translation.Translatable {
 
     // These strings MUST match the strings in nms.EntityTypes and are case sensitive.
     /**
@@ -436,6 +436,19 @@ public enum EntityType implements Keyed, Translatable {
     @Override
     @NotNull
     public String getTranslationKey() {
+        return Bukkit.getUnsafe().getTranslationKey(this);
+    }
+
+    /**
+     * Gets the translation key for this entity type.
+     *
+     * @return the translation key
+     * @throws IllegalArgumentException if this is {@link #UNKNOWN}
+     */
+    @Override
+    @NotNull
+    public String translationKey() {
+        Preconditions.checkArgument(this != UNKNOWN, "UNKNOWN entities do not have translation keys");
         return Bukkit.getUnsafe().getTranslationKey(this);
     }
 

@@ -25,6 +25,7 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_20_R1.CraftRegionAccessor;
+import org.bukkit.craftbukkit.v1_20_R1.block.data.CraftBlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.generator.LimitedRegion;
@@ -252,5 +253,42 @@ public class CraftLimitedRegion extends CraftRegionAccessor implements LimitedRe
     @Override
     public void addEntityToWorld(net.minecraft.world.entity.Entity entity, CreatureSpawnEvent.SpawnReason reason) {
         entities.add(entity);
+    }
+
+    @Override
+    public void setBlockState(int x, int y, int z, BlockState state) {
+        BlockPos position = new BlockPos(x, y, z);
+        BlockData currentData = CraftBlockData.fromData(getHandle().getBlockState(position));
+        if (!state.getBlockData().matches(currentData)) {
+            throw new IllegalArgumentException("BlockData does not match! Expected " + state.getBlockData().getAsString(false) + ", got " + currentData.getAsString(false));
+        }
+        getHandle().getBlockEntity(position).load(((org.bukkit.craftbukkit.v1_20_R1.block.CraftBlockEntityState<?>) state).getSnapshotNBT());
+    }
+
+    @Override
+    public void scheduleBlockUpdate(int x, int y, int z) {
+        BlockPos position = new BlockPos(x, y, z);
+        getHandle().scheduleTick(position, getHandle().getBlockState(position).getBlock(), 0);
+    }
+
+    @Override
+    public void scheduleFluidUpdate(int x, int y, int z) {
+        BlockPos position = new BlockPos(x, y, z);
+        getHandle().scheduleTick(position, getHandle().getFluidState(position).getType(), 0);
+    }
+
+    @Override
+    public World getWorld() {
+        return getHandle().getMinecraftWorld().getWorld();
+    }
+
+    @Override
+    public int getCenterChunkX() {
+        return centerChunkX;
+    }
+
+    @Override
+    public int getCenterChunkZ() {
+        return centerChunkZ;
     }
 }

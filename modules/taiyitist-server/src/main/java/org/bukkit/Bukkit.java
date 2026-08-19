@@ -125,6 +125,16 @@ public final class Bukkit {
     }
 
     /**
+     * Gets the version of the game this server implements.
+     *
+     * @return version of the game
+     */
+    @NotNull
+    public static String getMinecraftVersion() {
+        return server.getMinecraftVersion();
+    }
+
+    /**
      * Gets a view of all currently logged in players. This {@linkplain
      * Collections#unmodifiableCollection(Collection) view} is a reused
      * object, making some operations like {@link Collection#size()}

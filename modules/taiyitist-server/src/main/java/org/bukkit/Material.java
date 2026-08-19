@@ -118,7 +118,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * An enum of all material IDs accepted by the official server and client
  */
-public enum Material implements Keyed, Translatable {
+public enum Material implements Keyed, Translatable, net.kyori.adventure.translation.Translatable {
     //<editor-fold desc="Materials" defaultstate="collapsed">
     AIR(9648, 0),
     STONE(22948),
@@ -10950,6 +10950,16 @@ public enum Material implements Keyed, Translatable {
     @Override
     @NotNull
     public String getTranslationKey() {
+        if (this.isItem()) {
+            return Bukkit.getUnsafe().getItemTranslationKey(this);
+        } else {
+            return Bukkit.getUnsafe().getBlockTranslationKey(this);
+        }
+    }
+
+    @Override
+    @NotNull
+    public String translationKey() {
         if (this.isItem()) {
             return Bukkit.getUnsafe().getItemTranslationKey(this);
         } else {
