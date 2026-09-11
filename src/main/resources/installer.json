@@ -54,6 +54,6 @@
     "org.fusesource.jansi:jansi:1.18": "d9205bbcd4b5f9cd1effe752d18f73bd942d783f",
     "org.apache.maven:maven-artifact:3.8.5": "4433f50c07debefaed0553bd0068f4f48d449313",
     "net.fabricmc:intermediary:1.20.1": "97d0bff94981e37bd7a4362deee53c9a84e3fb21",
-    "net.fabricmc.fabric-api:fabric-api:0.92.2+1.20.1": "625ee015ee426d9b677382a7bb661383d89c0807"
+    "net.fabricmc.fabric-api:fabric-api:0.92.12+1.20.1": "3e9cdd3e2f827ca9a259df9eb8e31949437b6bd4"
   }
 }
